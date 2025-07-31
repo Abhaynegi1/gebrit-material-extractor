@@ -359,7 +359,32 @@ class CADProcessor {
         };
     }
 
+    /**
+     * Enrich fitting data with additional properties
+     * @param {Object} circle - Circle entity
+     * @returns {Object} - Enriched fitting data
+     */
+    enrichFittingData(circle) {
+        return {
+            ...circle,
+            fittingType: this.determineFittingType(circle),
+            diameter: this.estimateFittingDiameter(circle),
+            shaftNumber: this.extractShaftNumber(circle.layer)
+        };
+    }
 
+    /**
+     * Enrich block data with additional properties
+     * @param {Object} block - Block entity
+     * @returns {Object} - Enriched block data
+     */
+    enrichBlockData(block) {
+        return {
+            ...block,
+            blockType: this.determineBlockType(block),
+            shaftNumber: this.extractShaftNumber(block.layer)
+        };
+    }
 
     /**
      * Determine pipe type based on properties
@@ -374,6 +399,32 @@ class CADProcessor {
     }
 
     /**
+     * Determine fitting type based on properties
+     * @param {Object} circle - Circle entity
+     * @returns {string} - Fitting type
+     */
+    determineFittingType(circle) {
+        // Logic to determine fitting type based on radius and other properties
+        if (circle.radius > 50) return 'elbow';
+        if (circle.radius > 25) return 'tee';
+        return 'coupling';
+    }
+
+    /**
+     * Determine block type based on properties
+     * @param {Object} block - Block entity
+     * @returns {string} - Block type
+     */
+    determineBlockType(block) {
+        // Logic to determine block type based on block name
+        const blockName = block.blockName?.toLowerCase() || '';
+        if (blockName.includes('valve')) return 'valve';
+        if (blockName.includes('pump')) return 'pump';
+        if (blockName.includes('tank')) return 'tank';
+        return 'fitting';
+    }
+
+    /**
      * Estimate pipe diameter based on properties
      * @param {Object} polyline - Polyline entity
      * @returns {number} - Estimated diameter
@@ -384,6 +435,16 @@ class CADProcessor {
         if (polyline.length > 50) return 110;
         if (polyline.length > 20) return 75;
         return 50;
+    }
+
+    /**
+     * Estimate fitting diameter based on properties
+     * @param {Object} circle - Circle entity
+     * @returns {number} - Estimated diameter
+     */
+    estimateFittingDiameter(circle) {
+        // Estimate diameter based on circle radius
+        return circle.radius * 2;
     }
 
 
